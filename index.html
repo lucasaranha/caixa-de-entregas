@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Entregue sua atividade com nome, série e arquivo. O comprovante aparece na hora.">
+<meta property="og:title" content="Caixa de Entregas">
+<meta property="og:description" content="Entregue sua atividade com nome, série e arquivo. O comprovante aparece na hora.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232140C4' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='22 12 16 12 14 15 10 15 8 12 2 12'/%3E%3Cpath d='M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z'/%3E%3C/svg%3E">
+<title>Caixa de Entregas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Instrument+Sans:wght@400..700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: assimétrico. Orientações à esquerda; à direita, a ficha de entrega como folha com aba de pasta, sobre papel quadriculado. */
+:root{
+  --paper:#EEF1F6;
+  --grid:#E1E6EF;
+  --sheet:#FFFFFF;
+  --ink:#121829;
+  --ink-soft:#5B647A;
+  --line:#CCD3E0;
+  --pen:#2140C4;
+  --pen-ink:#FFFFFF;
+  --pen-wash:#E8EDFF;
+  --marker:#F5E35A;
+  --marker-ink:#121829;
+  --error:#B8322A;
+  --stamp-blend:multiply;
+  --font-display:"Bricolage Grotesque","Avenir Next","Segoe UI",system-ui,sans-serif;
+  --font-body:"Instrument Sans","Helvetica Neue",Arial,system-ui,sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --paper:#0C101A; --grid:#161C2A; --sheet:#131929; --ink:#E6E9F2; --ink-soft:#97A0B5;
+    --line:#2B3347; --pen:#8EA3FF; --pen-ink:#0C101A; --pen-wash:#1A2343; --marker:#E8D54C;
+    --marker-ink:#14161C; --error:#FF8F84; --stamp-blend:normal; color-scheme:dark;
+  }
+}
+
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none !important}
+img{max-width:100%}
+body{
+  margin:0;
+  background:
+    linear-gradient(var(--grid) 1px, transparent 1px) 0 0 / 28px 28px,
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px) 0 0 / 28px 28px,
+    var(--paper);
+  color:var(--ink);
+  font:400 1rem/1.55 var(--font-body);
+  -webkit-font-smoothing:antialiased;
+}
+button,input,select{font:inherit}
+[tabindex="-1"]:focus{outline:none}
+
+.wrap{
+  max-width:1120px;
+  margin:0 auto;
+  padding-block:24px 72px;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));
+  padding-right:max(16px, env(safe-area-inset-right, 0px));
+}
+
+/* topo */
+.top{display:flex; flex-wrap:wrap; gap:12px 20px; align-items:center; justify-content:space-between}
+.brand{display:inline-flex; align-items:center; gap:10px; font:700 1.0625rem/1 var(--font-display); letter-spacing:-.01em}
+.brand svg{width:22px; height:22px; color:var(--pen)}
+
+/* grade principal */
+.layout{
+  display:grid;
+  grid-template-columns:minmax(0,5fr) minmax(0,7fr);
+  gap:clamp(40px, 6vw, 96px);
+  align-items:start;
+  margin-top:clamp(44px, 8vw, 96px);
+}
+@media (max-width: 860px){
+  .layout{grid-template-columns:minmax(0,1fr); gap:48px}
+}
+
+/* coluna de orientações */
+.intro{display:grid; gap:28px; min-width:0}
+.eyebrow{font:500 .75rem/1 var(--font-mono); letter-spacing:.12em; text-transform:uppercase; color:var(--ink-soft); margin:0}
+h1{
+  margin:0;
+  font-family:var(--font-display);
+  font-weight:760;
+  font-size:clamp(2.6rem, 5.4vw, 4.6rem);
+  line-height:.98;
+  letter-spacing:-.035em;
+  font-variation-settings:"opsz" 96;
+  text-wrap:balance;
+  isolation:isolate;
+}
+h1 mark{background:none; color:var(--marker-ink); position:relative; white-space:nowrap}
+h1 mark::before{
+  content:""; position:absolute; z-index:-1;
+  left:-.06em; right:-.1em; top:.16em; bottom:.02em;
+  background:var(--marker);
+  border-radius:.06em .28em .1em .32em;
+  transform:rotate(-1.6deg) skewX(-10deg);
+}
+.lede{margin:0; font-size:1.125rem; max-width:38ch}
+.specs{margin:0; display:grid; border-top:1px solid var(--line)}
+.specs > div{display:grid; grid-template-columns:112px minmax(0,1fr); gap:16px; padding:13px 0; border-bottom:1px solid var(--line)}
+.specs dt{font:500 .6875rem/1.9 var(--font-mono); letter-spacing:.1em; text-transform:uppercase; color:var(--ink-soft)}
+.specs dd{margin:0; font-size:.9375rem; min-width:0}
+.tip{display:grid; grid-template-columns:auto minmax(0,1fr); gap:14px; align-items:start; margin:0; font-size:.9375rem; color:var(--ink-soft); max-width:44ch}
+.tip svg{width:20px; height:20px; margin-top:2px; color:var(--ink)}
+.tip b{color:var(--ink); font-weight:600}
+
+/* a folha */
+.desk{position:relative; padding-top:33px; min-width:0; scroll-margin-top:16px}
+.sheet{
+  position:relative;
+  background:var(--sheet);
+  border:1px solid var(--line);
+  padding:clamp(22px, 4vw, 44px);
+  box-shadow:7px 7px 0 -1px var(--sheet), 7px 7px 0 0 var(--line);
+}
+.tab{
+  position:absolute; left:-1px; bottom:calc(100% - 1px);
+  display:inline-flex; align-items:center; gap:10px;
+  padding:9px 16px;
+  background:var(--sheet);
+  border:1px solid var(--line); border-bottom:0;
+  font:500 .6875rem/1 var(--font-mono); letter-spacing:.1em; text-transform:uppercase; color:var(--ink-soft);
+}
+.tab b{font-weight:500; color:var(--ink)}
+
+/* campos */
+.form{display:grid; gap:34px}
+.field{display:grid; gap:6px; min-width:0}
+.label{font:500 .6875rem/1.4 var(--font-mono); letter-spacing:.1em; text-transform:uppercase; color:var(--ink-soft)}
+.field:focus-within > .label{color:var(--pen)}
+.line{
+  width:100%;
+  font-size:1.25rem; line-height:1.3; color:var(--ink);
+  background:transparent;
+  border:0; border-bottom:1.5px solid var(--line); border-radius:0;
+  padding:8px 0 10px;
+  -webkit-appearance:none; appearance:none;
+  transition:border-color .15s, box-shadow .15s;
+}
+.line::placeholder{color:var(--ink-soft); opacity:.65}
+.line:hover{border-bottom-color:var(--ink-soft)}
+.line:focus{outline:none; border-bottom-color:var(--pen); box-shadow:0 1.5px 0 var(--pen)}
+.line:disabled{opacity:.6}
+.field.invalid .line{border-bottom-color:var(--error)}
+.select{position:relative}
+.select .line{padding-right:34px; cursor:pointer}
+.select select:invalid{color:var(--ink-soft)}
+.select option, .select optgroup{color:var(--ink); background:var(--sheet)}
+.select svg{position:absolute; right:2px; top:50%; width:18px; height:18px; transform:translateY(-50%); pointer-events:none; color:var(--ink-soft)}
+.error{margin:0; color:var(--error); font-size:.875rem; line-height:1.45}
+.error:empty{display:none}
+
+/* área do arquivo */
+.drop{
+  position:relative;
+  display:grid; grid-template-columns:auto minmax(0,1fr); gap:16px; align-items:center;
+  margin-top:6px; padding:22px 20px;
+  border:1.5px dashed var(--line);
+  cursor:pointer;
+  transition:background-color .15s, border-color .15s;
+}
+.drop:hover, .drop.is-over{border-color:var(--pen); background:var(--pen-wash)}
+.drop:focus-within{outline:2px solid var(--pen); outline-offset:3px}
+.drop.is-locked{opacity:.6; cursor:default; pointer-events:none}
+.field.invalid .drop{border-color:var(--error)}
+.drop .clip{width:46px; height:46px; display:grid; place-items:center; border:1.5px solid var(--ink); border-radius:50%; color:var(--ink); transition:transform .2s}
+.drop.is-over .clip{transform:rotate(-12deg) scale(1.06)}
+.drop .clip svg{width:20px; height:20px}
+.drop strong{display:block; font-weight:600; font-size:1rem}
+.drop .sub{display:block; color:var(--ink-soft); font-size:.875rem}
+.only-touch{display:none}
+@media (hover:none){ .only-touch{display:inline} .only-mouse{display:none} }
+.sr-input{position:absolute; width:1px; height:1px; opacity:0; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap}
+
+.files{list-style:none; margin:6px 0 0; padding:0; display:grid; gap:8px}
+.files:empty{display:none}
+.files li{display:grid; grid-template-columns:40px minmax(0,1fr) auto auto; gap:12px; align-items:center; padding:7px 6px 7px 7px; border:1px solid var(--line)}
+.thumb{width:40px; height:40px; display:grid; place-items:center; overflow:hidden; background:var(--pen-wash); color:var(--pen); font:500 .625rem/1 var(--font-mono); letter-spacing:.04em}
+.thumb img{width:100%; height:100%; object-fit:cover}
+.fname{min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:.9375rem}
+.fsize{font:400 .75rem/1 var(--font-mono); color:var(--ink-soft); font-variant-numeric:tabular-nums}
+.remove{width:34px; height:34px; display:grid; place-items:center; background:transparent; border:0; border-radius:50%; color:var(--ink-soft); cursor:pointer}
+.remove svg{width:16px; height:16px}
+.remove:hover{color:var(--error); background:var(--pen-wash)}
+.remove:focus-visible{outline:2px solid var(--pen); outline-offset:1px}
+.remove:disabled{opacity:.4; cursor:default}
+
+/* envio */
+.actions{display:grid; gap:14px; padding-top:26px; border-top:1.5px dashed var(--line)}
+.actions-row{display:flex; flex-wrap:wrap; gap:16px 24px; align-items:center; justify-content:space-between}
+.actions-row p{margin:0; font-size:.875rem; color:var(--ink-soft); max-width:30ch}
+.btn{
+  position:relative; overflow:hidden;
+  display:inline-flex; align-items:center; gap:12px;
+  padding:16px 22px;
+  font-weight:600; font-size:1rem; line-height:1;
+  color:var(--pen-ink); background:var(--pen);
+  border:0; border-radius:2px; cursor:pointer;
+  transition:transform .15s, box-shadow .15s;
+}
+.btn svg{width:18px; height:18px; transition:transform .15s}
+.btn:hover{transform:translate(-2px,-2px); box-shadow:3px 3px 0 var(--ink)}
+.btn:hover svg{transform:translateX(3px)}
+.btn:focus-visible{outline:2px solid var(--pen); outline-offset:3px}
+.btn .bar{position:absolute; left:0; bottom:0; width:100%; height:3px; background:var(--marker); transform:scaleX(0); transform-origin:left; transition:transform .35s ease}
+.btn.is-sending{cursor:progress; transform:none; box-shadow:none}
+.btn.is-sending svg{display:none}
+
+/* comprovante */
+.receipt{display:grid; gap:28px}
+.r-head{display:flex; flex-wrap:wrap; gap:22px 24px; align-items:flex-start; justify-content:space-between}
+.r-head > div{min-width:0}
+.r-head h2{margin:0 0 14px; font-family:var(--font-display); font-weight:720; font-size:clamp(1.75rem, 3.2vw, 2.4rem); line-height:1.05; letter-spacing:-.025em; text-wrap:balance}
+.protocol{margin:0; font:500 1.1875rem/1 var(--font-mono); letter-spacing:.06em; font-variant-numeric:tabular-nums}
+.protocol span{display:block; margin-bottom:8px; font-size:.6875rem; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-soft)}
+.stamp{
+  flex:none;
+  display:grid; justify-items:center; gap:2px;
+  margin:4px 10px 0 0; padding:14px 20px 12px;
+  color:var(--pen);
+  border:3px solid currentColor; border-radius:8px;
+  outline:1.5px solid currentColor; outline-offset:-9px;
+  transform:rotate(-9deg);
+  mix-blend-mode:var(--stamp-blend);
+  opacity:.9;
+}
+.stamp strong{font-family:var(--font-display); font-weight:800; font-size:1.55rem; line-height:1; letter-spacing:.14em; text-transform:uppercase; padding:4px 0 0 .14em}
+.stamp small{font:500 .6875rem/1 var(--font-mono); letter-spacing:.16em; padding-bottom:4px}
+.receipt.stamped .stamp{animation:thump .5s cubic-bezier(.2,.9,.3,1.2) both}
+.receipt.stamped{animation:jolt .3s .24s ease-out}
+@keyframes thump{
+  0%{opacity:0; transform:rotate(-9deg) scale(1.9)}
+  55%{opacity:.95; transform:rotate(-9deg) scale(.93)}
+  100%{opacity:.9; transform:rotate(-9deg) scale(1)}
+}
+@keyframes jolt{0%{transform:none} 30%{transform:translateY(3px)} 100%{transform:none}}
+.r-rows{margin:0; display:grid; border-top:1.5px dashed var(--line)}
+.r-rows > div{display:grid; grid-template-columns:120px minmax(0,1fr); gap:16px; padding:14px 0; border-bottom:1px solid var(--line)}
+.r-rows dt{font:500 .6875rem/1.9 var(--font-mono); letter-spacing:.1em; text-transform:uppercase; color:var(--ink-soft)}
+.r-rows dd{margin:0; min-width:0; overflow-wrap:anywhere}
+.r-files{list-style:none; margin:0; padding:0; display:grid; gap:6px}
+.r-files li{display:flex; gap:12px; justify-content:space-between; align-items:baseline; min-width:0}
+.r-files .n{min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.r-files .s{flex:none; font:400 .75rem/1 var(--font-mono); color:var(--ink-soft); font-variant-numeric:tabular-nums}
+.r-foot{display:flex; flex-wrap:wrap; gap:16px 24px; align-items:center; justify-content:space-between}
+.r-foot p{margin:0; font-size:.875rem; color:var(--ink-soft); max-width:32ch}
+.btn-ghost{padding:13px 18px; font-weight:600; font-size:.9375rem; color:var(--ink); background:transparent; border:1.5px solid var(--ink); border-radius:2px; cursor:pointer; transition:background-color .15s, color .15s}
+.btn-ghost:hover{background:var(--ink); color:var(--sheet)}
+.btn-ghost:focus-visible{outline:2px solid var(--pen); outline-offset:3px}
+
+@media (max-width: 520px){
+  .specs > div, .r-rows > div{grid-template-columns:minmax(0,1fr); gap:2px}
+  .line{font-size:1.125rem}
+  .actions .btn{width:100%; justify-content:center}
+  .stamp strong{font-size:1.3rem}
+}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none !important; transition:none !important}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <span class="brand">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
+      Caixa de Entregas
+    </span>
+  </header>
+
+  <main class="layout">
+    <section class="intro" aria-labelledby="titulo">
+      <p class="eyebrow">4º bimestre · 2026</p>
+      <h1 id="titulo">Entregue sua <mark>atividade</mark> por aqui.</h1>
+      <p class="lede">Preencha seu nome, escolha sua série e anexe o arquivo. O comprovante aparece na hora, sem precisar mandar e-mail.</p>
+      <dl class="specs">
+        <div><dt>Formatos</dt><dd>PDF, Word, PowerPoint e imagens (JPG, PNG, HEIC)</dd></div>
+        <div><dt>Tamanho</dt><dd>Até 10 MB por arquivo, até 5 arquivos por entrega</dd></div>
+        <div><dt>Comprovante</dt><dd>Sai na tela com número de protocolo, data e hora</dd></div>
+      </dl>
+      <p class="tip">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+        <span><b>Foto do caderno?</b> Use boa luz, deixe a folha inteira aparecendo e evite a sombra da mão sobre o texto.</span>
+      </p>
+    </section>
+
+    <div class="desk" id="mesa">
+      <form class="sheet form" id="entrega" novalidate>
+        <span class="tab">Ficha de <b>entrega</b></span>
+
+        <div class="field" data-field="nome">
+          <label class="label" for="nome">Nome completo</label>
+          <input class="line" id="nome" name="nome" type="text" autocomplete="name" maxlength="80" placeholder="Como aparece na chamada" aria-describedby="nome-erro">
+          <p class="error" id="nome-erro" aria-live="polite"></p>
+        </div>
+
+        <div class="field" data-field="serie">
+          <label class="label" for="serie">Série</label>
+          <div class="select">
+            <select class="line" id="serie" name="serie" required aria-describedby="serie-erro">
+              <option value="" disabled selected>Escolha sua série</option>
+              <optgroup label="Ensino Fundamental">
+                <option value="6ano">6º ano</option>
+                <option value="7ano">7º ano</option>
+                <option value="8ano">8º ano</option>
+                <option value="9ano">9º ano</option>
+              </optgroup>
+              <optgroup label="Ensino Médio">
+                <option value="1em">1ª série</option>
+                <option value="2em">2ª série</option>
+                <option value="3em">3ª série</option>
+              </optgroup>
+            </select>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+          </div>
+          <p class="error" id="serie-erro" aria-live="polite"></p>
+        </div>
+
+        <div class="field" data-field="arquivo">
+          <span class="label" id="arquivo-label">Arquivo da atividade</span>
+          <label class="drop" id="drop" for="arquivo">
+            <span class="clip" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+            </span>
+            <span>
+              <strong>
+                <span class="only-mouse" id="t-mouse">Arraste o arquivo para cá</span>
+                <span class="only-touch" id="t-touch">Toque para escolher o arquivo</span>
+              </strong>
+              <span class="sub" id="arquivo-dica">
+                <span class="only-mouse">ou clique para procurar no computador</span>
+                <span class="only-touch">ou tire uma foto da atividade agora</span>
+              </span>
+            </span>
+            <input class="sr-input" id="arquivo" name="arquivo" type="file" multiple
+              accept=".pdf,.doc,.docx,.odt,.rtf,.txt,.ppt,.pptx,.odp,.xls,.xlsx,.jpg,.jpeg,.png,.heic,.heif,.webp,.gif,image/*"
+              aria-labelledby="arquivo-label arquivo-dica" aria-describedby="arquivo-erro">
+          </label>
+          <ul class="files" id="lista" aria-label="Arquivos anexados"></ul>
+          <p class="error" id="arquivo-erro" aria-live="polite"></p>
+        </div>
+
+        <div class="actions">
+          <div class="actions-row">
+            <p>Confira o nome e a série antes de entregar.</p>
+            <button class="btn" id="enviar" type="submit">
+              <span class="btn-text">Entregar atividade</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+              <span class="bar" id="barra" aria-hidden="true"></span>
+            </button>
+          </div>
+          <p class="error" id="envio-erro" role="alert"></p>
+        </div>
+      </form>
+
+      <section class="sheet receipt" id="comprovante" aria-labelledby="c-titulo" hidden>
+        <span class="tab">Comprovante</span>
+        <div class="r-head">
+          <div>
+            <h2 id="c-titulo" tabindex="-1">Atividade entregue</h2>
+            <p class="protocol"><span>Protocolo</span><b id="c-protocolo"></b></p>
+          </div>
+          <div class="stamp" aria-hidden="true">
+            <strong>Recebido</strong>
+            <small id="c-carimbo"></small>
+          </div>
+        </div>
+        <dl class="r-rows">
+          <div><dt>Aluno(a)</dt><dd id="c-nome"></dd></div>
+          <div><dt>Série</dt><dd id="c-serie"></dd></div>
+          <div><dt>Entregue em</dt><dd id="c-data"></dd></div>
+          <div><dt>Arquivos</dt><dd><ul class="r-files" id="c-arquivos"></ul></dd></div>
+        </dl>
+        <div class="r-foot">
+          <p>Se quiser guardar o comprovante, tire um print desta tela.</p>
+          <button type="button" class="btn-ghost" id="outra">Entregar outra atividade</button>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<script src="config.js"></script>
+<script>
+(function () {
+  var ACCEPT = ['pdf','doc','docx','odt','rtf','txt','ppt','pptx','odp','xls','xlsx','jpg','jpeg','png','heic','heif','webp','gif'];
+  var LIMITE_MB = 10;
+  var MAX_BYTES = LIMITE_MB * 1024 * 1024;
+  var MAX_FILES = 5;
+  var MESES = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var ERRO_GERAL = 'A entrega não foi concluída. Confira sua internet e toque em “Entregar atividade” de novo.';
+
+  var $ = function (id) { return document.getElementById(id); };
+  var form = $('entrega'), nome = $('nome'), serie = $('serie'), input = $('arquivo');
+  var drop = $('drop'), lista = $('lista'), btn = $('enviar'), barra = $('barra');
+  var receipt = $('comprovante'), mesa = $('mesa');
+  var btnText = btn.querySelector('.btn-text');
+
+  var files = [];
+  var seq = 0;
+  var enviando = false;
+
+  function pad(x) { return String(x).padStart(2, '0'); }
+  function ext(n) { var i = n.lastIndexOf('.'); return i > -1 ? n.slice(i + 1).toLowerCase() : ''; }
+  function size(b) {
+    return b < 1048576
+      ? Math.max(1, Math.round(b / 1024)) + ' KB'
+      : (b / 1048576).toFixed(1).replace('.', ',') + ' MB';
+  }
+  function canPreview(f) { return /^image\/(jpeg|png|webp|gif)$/.test(f.type); }
+
+  function setError(key, msg) {
+    var field = document.querySelector('[data-field="' + key + '"]');
+    $(key + '-erro').textContent = msg || '';
+    field.classList.toggle('invalid', !!msg);
+    var ctl = $(key);
+    if (msg) ctl.setAttribute('aria-invalid', 'true'); else ctl.removeAttribute('aria-invalid');
+  }
+
+  function addFiles(list) {
+    var problems = [];
+    var novos = Array.prototype.slice.call(list);
+    for (var k = 0; k < novos.length; k++) {
+      var f = novos[k];
+      if (ACCEPT.indexOf(ext(f.name)) < 0) {
+        problems.push('“' + f.name + '” não é um formato aceito. Envie PDF, Word, PowerPoint ou imagem.');
+        continue;
+      }
+      if (f.size === 0) {
+        problems.push('“' + f.name + '” está vazio. Escolha o arquivo de novo.');
+        continue;
+      }
+      if (f.size > MAX_BYTES) {
+        problems.push('“' + f.name + '” tem ' + size(f.size) + '. O limite é ' + LIMITE_MB + ' MB por arquivo.');
+        continue;
+      }
+      var repetido = files.some(function (x) { return x.file.name === f.name && x.file.size === f.size; });
+      if (repetido) continue;
+      if (files.length >= MAX_FILES) {
+        problems.push('Dá para anexar até ' + MAX_FILES + ' arquivos por entrega.');
+        break;
+      }
+      files.push({ id: ++seq, file: f, url: canPreview(f) ? URL.createObjectURL(f) : null });
+    }
+    input.value = '';
+    render();
+    setError('arquivo', problems.join(' '));
+  }
+
+  function removeFile(id) {
+    if (enviando) return;
+    var i = files.findIndex(function (x) { return x.id === id; });
+    if (i < 0) return;
+    if (files[i].url) URL.revokeObjectURL(files[i].url);
+    files.splice(i, 1);
+    render();
+    input.focus();
+  }
+
+  function badge(el, file) {
+    el.textContent = (ext(file.name) || 'arq').slice(0, 4).toUpperCase();
+  }
+
+  function render() {
+    var itens = files.map(function (item) {
+      var li = document.createElement('li');
+      var thumb = document.createElement('span');
+      thumb.className = 'thumb';
+      if (item.url) {
+        var img = new Image();
+        img.alt = '';
+        img.onerror = function () { thumb.replaceChildren(); badge(thumb, item.file); };
+        img.src = item.url;
+        thumb.append(img);
+      } else {
+        badge(thumb, item.file);
+      }
+      var name = document.createElement('span');
+      name.className = 'fname';
+      name.textContent = item.file.name;
+      name.title = item.file.name;
+      var sz = document.createElement('span');
+      sz.className = 'fsize';
+      sz.textContent = size(item.file.size);
+      var rm = document.createElement('button');
+      rm.type = 'button';
+      rm.className = 'remove';
+      rm.setAttribute('aria-label', 'Remover ' + item.file.name);
+      rm.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>';
+      rm.addEventListener('click', function () { removeFile(item.id); });
+      li.append(thumb, name, sz, rm);
+      return li;
+    });
+    lista.replaceChildren.apply(lista, itens);
+    var more = files.length > 0;
+    $('t-mouse').textContent = more ? 'Arraste mais um arquivo' : 'Arraste o arquivo para cá';
+    $('t-touch').textContent = more ? 'Toque para adicionar outro' : 'Toque para escolher o arquivo';
+  }
+
+  input.addEventListener('change', function () { if (input.files.length) addFiles(input.files); });
+
+  ['dragenter', 'dragover'].forEach(function (t) {
+    drop.addEventListener(t, function (e) {
+      e.preventDefault();
+      if (!enviando) drop.classList.add('is-over');
+    });
+  });
+  ['dragleave', 'dragend'].forEach(function (t) {
+    drop.addEventListener(t, function (e) {
+      if (!drop.contains(e.relatedTarget)) drop.classList.remove('is-over');
+    });
+  });
+  drop.addEventListener('drop', function (e) {
+    e.preventDefault();
+    drop.classList.remove('is-over');
+    if (!enviando && e.dataTransfer && e.dataTransfer.files.length) addFiles(e.dataTransfer.files);
+  });
+  // Evita que o navegador abra o arquivo se ele cair fora da área.
+  window.addEventListener('dragover', function (e) { e.preventDefault(); });
+  window.addEventListener('drop', function (e) { e.preventDefault(); });
+
+  nome.addEventListener('input', function () { setError('nome', ''); });
+  serie.addEventListener('change', function () { setError('serie', ''); });
+
+  function gerarProtocolo(d) {
+    var A = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    var buf = new Uint32Array(4);
+    crypto.getRandomValues(buf);
+    var r = '';
+    for (var i = 0; i < buf.length; i++) r += A[buf[i] % A.length];
+    return 'ENT-' + String(d.getFullYear()).slice(2) + pad(d.getMonth() + 1) + pad(d.getDate()) + '-' + r;
+  }
+
+  function lerBase64(file) {
+    return new Promise(function (ok, erro) {
+      var leitor = new FileReader();
+      leitor.onload = function () { ok(String(leitor.result).split(',')[1] || ''); };
+      leitor.onerror = function () {
+        erro(new Error('CE|Não deu para ler “' + file.name + '”. Escolha o arquivo de novo.'));
+      };
+      leitor.readAsDataURL(file);
+    });
+  }
+
+  var SERVIDOR = String((window.CAIXA_CONFIG && window.CAIXA_CONFIG.servidor) || '').trim();
+
+  function chamar(acao, dados) {
+    if (!/^https:\/\/script\.google\.com\/.+\/exec$/.test(SERVIDOR)) {
+      return Promise.reject(new Error('CE|O site ainda não está ligado ao Google Drive. Avise o professor.'));
+    }
+    // Corpo em texto simples: assim o navegador não faz a checagem prévia de CORS, que o Apps Script não atende.
+    return fetch(SERVIDOR, { method: 'POST', body: JSON.stringify({ acao: acao, dados: dados }) })
+      .then(function (r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      })
+      .then(function (j) {
+        if (!j || !j.ok) throw new Error(j && j.erro ? 'CE|' + j.erro : 'servidor');
+        return j.dados;
+      });
+  }
+
+  function mensagem(err) {
+    var m = String((err && err.message) || err || '');
+    var i = m.indexOf('CE|');
+    return i > -1 ? m.slice(i + 3) : ERRO_GERAL;
+  }
+
+  function travar(on) {
+    enviando = on;
+    nome.disabled = on;
+    serie.disabled = on;
+    input.disabled = on;
+    drop.classList.toggle('is-locked', on);
+    lista.querySelectorAll('button').forEach(function (b) { b.disabled = on; });
+    btn.classList.toggle('is-sending', on);
+    if (on) btn.setAttribute('aria-disabled', 'true'); else btn.removeAttribute('aria-disabled');
+    if (!on) {
+      btnText.textContent = 'Entregar atividade';
+      barra.style.transform = '';
+    }
+  }
+
+  function progresso(fracao) {
+    barra.style.transform = 'scaleX(' + Math.max(0, Math.min(1, fracao)) + ')';
+  }
+
+  function showReceipt(d) {
+    var now = new Date();
+    $('c-protocolo').textContent = d.protocolo;
+    $('c-nome').textContent = d.nome;
+    $('c-serie').textContent = d.serie;
+    $('c-data').textContent = pad(now.getDate()) + ' ' + MESES[now.getMonth()] + ' ' + now.getFullYear() + ', ' + pad(now.getHours()) + ':' + pad(now.getMinutes());
+    $('c-carimbo').textContent = pad(now.getDate()) + ' ' + MESES[now.getMonth()].toUpperCase() + ' ' + now.getFullYear();
+    var itens = d.arquivos.map(function (a) {
+      var li = document.createElement('li');
+      var n = document.createElement('span'); n.className = 'n'; n.textContent = a.nome; n.title = a.nome;
+      var s = document.createElement('span'); s.className = 's'; s.textContent = a.tamanho;
+      li.append(n, s);
+      return li;
+    });
+    var cl = $('c-arquivos');
+    cl.replaceChildren.apply(cl, itens);
+    form.hidden = true;
+    receipt.hidden = false;
+    receipt.classList.remove('stamped');
+    void receipt.offsetWidth;
+    receipt.classList.add('stamped');
+    $('c-titulo').focus({ preventScroll: true });
+    var top = mesa.getBoundingClientRect().top;
+    if (top < 0 || top > window.innerHeight * 0.6) {
+      mesa.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+    }
+  }
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (enviando) return;
+    $('envio-erro').textContent = '';
+
+    var n = nome.value.trim().replace(/\s+/g, ' ');
+    var errs = {
+      nome: !n ? 'Escreva seu nome completo.'
+        : n.split(' ').length < 2 ? 'Escreva nome e sobrenome, como aparece na chamada.' : '',
+      serie: serie.value ? '' : 'Escolha sua série na lista.',
+      arquivo: files.length ? '' : 'Anexe pelo menos um arquivo com a sua atividade.'
+    };
+    Object.keys(errs).forEach(function (k) { setError(k, errs[k]); });
+    var first = ['nome', 'serie', 'arquivo'].find(function (k) { return errs[k]; });
+    if (first) { $(first).focus(); return; }
+
+    var lote = files.slice();
+    var opt = serie.selectedOptions[0];
+    var serieTexto = opt.textContent + ' · ' + opt.parentElement.label;
+    var base = { protocolo: gerarProtocolo(new Date()), nome: n, serie: serie.value };
+    var total = lote.length + 0.4;
+    var ids = [];
+
+    travar(true);
+    btnText.textContent = 'Enviando…';
+    progresso(0.06);
+
+    var cadeia = Promise.resolve();
+    lote.forEach(function (item, i) {
+      cadeia = cadeia.then(function () {
+        if (lote.length > 1) btnText.textContent = 'Enviando ' + (i + 1) + ' de ' + lote.length + '…';
+        return lerBase64(item.file);
+      }).then(function (conteudo) {
+        return chamar('enviarArquivo', {
+          protocolo: base.protocolo, nome: base.nome, serie: base.serie,
+          arquivo: item.file.name, conteudo: conteudo
+        });
+      }).then(function (r) {
+        ids.push(r.id);
+        progresso((i + 1) / total);
+      });
+    });
+
+    cadeia.then(function () {
+      btnText.textContent = 'Registrando…';
+      return chamar('registrarEntrega', {
+        protocolo: base.protocolo, nome: base.nome, serie: base.serie, ids: ids
+      });
+    }).then(function () {
+      progresso(1);
+      showReceipt({
+        protocolo: base.protocolo,
+        nome: n,
+        serie: serieTexto,
+        arquivos: lote.map(function (x) { return { nome: x.file.name, tamanho: size(x.file.size) }; })
+      });
+      travar(false);
+    }).catch(function (err) {
+      travar(false);
+      $('envio-erro').textContent = mensagem(err);
+    });
+  });
+
+  $('outra').addEventListener('click', function () {
+    files.forEach(function (x) { if (x.url) URL.revokeObjectURL(x.url); });
+    files = [];
+    render();
+    form.reset();
+    ['nome', 'serie', 'arquivo'].forEach(function (k) { setError(k, ''); });
+    $('envio-erro').textContent = '';
+    receipt.hidden = true;
+    form.hidden = false;
+    nome.focus();
+  });
+})();
+</script>
+</body>
+</html>
