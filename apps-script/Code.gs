@@ -21,13 +21,8 @@ const MAX_ARQUIVOS = 5;
 
 // As chaves precisam ser iguais aos "value" da lista de séries no Index.html.
 const SERIES = {
-  '6ano': '6º ano',
-  '7ano': '7º ano',
-  '8ano': '8º ano',
-  '9ano': '9º ano',
-  '1em': '1ª série (EM)',
-  '2em': '2ª série (EM)',
-  '3em': '3ª série (EM)'
+  '1ano': '1º ano',
+  '2ano': '2º ano'
 };
 
 const TIPOS = {

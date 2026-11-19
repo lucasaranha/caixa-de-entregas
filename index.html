@@ -307,17 +307,8 @@ h1 mark::before{
           <div class="select">
             <select class="line" id="serie" name="serie" required aria-describedby="serie-erro">
               <option value="" disabled selected>Escolha sua série</option>
-              <optgroup label="Ensino Fundamental">
-                <option value="6ano">6º ano</option>
-                <option value="7ano">7º ano</option>
-                <option value="8ano">8º ano</option>
-                <option value="9ano">9º ano</option>
-              </optgroup>
-              <optgroup label="Ensino Médio">
-                <option value="1em">1ª série</option>
-                <option value="2em">2ª série</option>
-                <option value="3em">3ª série</option>
-              </optgroup>
+              <option value="1ano">1º ano</option>
+              <option value="2ano">2º ano</option>
             </select>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
           </div>
@@ -640,7 +631,8 @@ h1 mark::before{
 
     var lote = files.slice();
     var opt = serie.selectedOptions[0];
-    var serieTexto = opt.textContent + ' · ' + opt.parentElement.label;
+    var grupo = opt.parentElement.tagName === 'OPTGROUP' ? opt.parentElement.label : '';
+    var serieTexto = grupo ? opt.textContent + ' · ' + grupo : opt.textContent;
     var base = { protocolo: gerarProtocolo(new Date()), nome: n, serie: serie.value };
     var total = lote.length + 0.4;
     var ids = [];
