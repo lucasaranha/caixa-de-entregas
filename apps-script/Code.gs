@@ -15,6 +15,7 @@ const FUSO = 'America/Sao_Paulo';
 const NOME_PASTA = 'Caixa de Entregas';
 const NOME_PLANILHA = 'Caixa de Entregas · registro';
 const NOME_ABA = 'Entregas';
+const CABECALHO = ['Entregue em', 'Protocolo', 'Aluno(a)', 'Série', 'Arquivos', 'Corrigida'];
 const LIMITE_MB = 10;
 const MAX_ARQUIVOS = 5;
 
@@ -76,11 +77,21 @@ function doPost(e) {
   return json_(resposta);
 }
 
-/** Rode uma vez pelo editor: cria a pasta, as subpastas por série e a planilha. */
+/**
+ * Rode pelo editor na primeira vez: cria a pasta, as subpastas por série e a planilha.
+ * Rodar de novo é seguro: nada é duplicado, e os nomes das pastas, da planilha e
+ * do cabeçalho voltam a ser os definidos aqui (útil depois de mudar as séries).
+ */
 function configurar() {
   const raiz = pastaRaiz_();
-  Object.keys(SERIES).forEach(function (chave) { pastaDaSerie_(chave); });
+  if (raiz.getName() !== NOME_PASTA) raiz.setName(NOME_PASTA);
+  Object.keys(SERIES).forEach(function (chave) {
+    const pasta = pastaDaSerie_(chave);
+    if (pasta.getName() !== SERIES[chave]) pasta.setName(SERIES[chave]);
+  });
   const planilha = planilha_();
+  if (planilha.getName() !== NOME_PLANILHA) planilha.rename(NOME_PLANILHA);
+  abaEntregas_().getRange(1, 1, 1, CABECALHO.length).setValues([CABECALHO]);
   console.log('Pasta das entregas: ' + raiz.getUrl());
   console.log('Planilha de registro: ' + planilha.getUrl());
 }
@@ -230,9 +241,9 @@ function planilha_() {
   ss.setSpreadsheetTimeZone(FUSO);
   const aba = ss.getSheets()[0];
   aba.setName(NOME_ABA);
-  aba.appendRow(['Entregue em', 'Protocolo', 'Aluno(a)', 'Série', 'Arquivos', 'Corrigida']);
+  aba.appendRow(CABECALHO);
   aba.setFrozenRows(1);
-  aba.getRange(1, 1, 1, 6).setFontWeight('bold');
+  aba.getRange(1, 1, 1, CABECALHO.length).setFontWeight('bold');
   aba.getRange('A:A').setNumberFormat('dd/mm/yyyy hh:mm');
   aba.getRange('E:E').setWrap(true);
   aba.setColumnWidth(1, 140);
